@@ -22,9 +22,9 @@ ADDONS = {}
 ROBOTSTXT_OBEY = True
 
 # Concurrency and throttling settings
-#CONCURRENT_REQUESTS = 16
-CONCURRENT_REQUESTS_PER_DOMAIN = 1
-DOWNLOAD_DELAY = 1
+CONCURRENT_REQUESTS = 10
+# CONCURRENT_REQUESTS_PER_DOMAIN = 1
+DOWNLOAD_DELAY = 0.5
 
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
@@ -84,4 +84,23 @@ DOWNLOAD_DELAY = 1
 #HTTPCACHE_STORAGE = "scrapy.extensions.httpcache.FilesystemCacheStorage"
 
 # Set settings whose default value is deprecated to a future-proof value
+
+
+REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
+TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+LOG_LEVEL = "ERROR"
+#
+# REDIS_START_URLS_KEY = '%(name)s:start_urls'
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+DUPEFILTER_CLASS = "technolife.dupefilter.NoDupeFilter"
+# REDIS_URL = 'redis://:rv6e7hya18nPA@62.106.95.202:6379'
+REDIS_URL = 'redis://localhost:6379'
+SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.FifoQueue'
+MAX_IDLE_TIME_BEFORE_CLOSE = 3600 * 30
+
+ITEM_PIPELINES = {
+   'scrapy_redis.pipelines.RedisPipeline': 200,
+}
+
+LOG_LEVEL = "ERROR"

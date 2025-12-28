@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  technolife-crawler:
+    build: .
+    environment:
+      - REDIS_KEYS=high_discount_products,low_discount_products,first_crawl,no_discount_products,inactive_products
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    deploy:
+      replicas: 1

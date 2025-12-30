@@ -155,7 +155,11 @@ class ProductsSpider(RedisSpider):
 
         for variant in merged_variants:
             keep_keys = {"price", "discounted_price", "discount"}
-            prices = {k: v for k, v in variant.items() if k in keep_keys}
+            prices = {
+                k: (v * 10 if k in {"price", "discounted_price"} else v)
+                for k, v in variant.items()
+                if k in keep_keys
+            }
             discount = 0
             if prices["discount"]:
                 discount = int(prices["discount"].replace("%",""))

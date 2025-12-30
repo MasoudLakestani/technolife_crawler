@@ -11,4 +11,4 @@ services:
       - ./data:/app/data
     restart: unless-stopped
     deploy:
-      replicas: 1
+      replicas: 20

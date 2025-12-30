@@ -165,7 +165,7 @@ class ProductsSpider(RedisSpider):
                     "discount_percent": discount
                 }
 
-            variant_id = variant["_id"]
+            variant_id = int(variant["_id"][-4:], 16)
                 
             if variant_id in ids:
                 ids.remove(variant_id)
@@ -242,7 +242,7 @@ class ProductsSpider(RedisSpider):
             product["title_en"] = None
             product["supply_category"] = None
 
-            middle_items = categories_data.get('state', '').get('data', '')[1:-1]
+            middle_items = categories_data.get('state', '').get('data', '')[1:]
             categories = [None]*5     
 
             for i, item in enumerate(middle_items):

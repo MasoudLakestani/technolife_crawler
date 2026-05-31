@@ -254,11 +254,16 @@ class ProductsSpider(RedisSpider):
                     categories[i] = item["name"]
 
             category1, category2, category3, category4, category5 = categories
-            product["category1"] = category1
-            product["category2"] = category2
-            product["category3"] = category3
-            product["category4"] = category4
-            product["category5"] = category5        
+            # product["category1"] = category1
+            # product["category2"] = category2
+            # product["category3"] = category3
+            # product["category4"] = category4
+            # product["category5"] = category5
+            product["category1"] = None
+            product["category2"] = None
+            product["category3"] = None
+            product["category4"] = None
+            product["category5"] = None     
 
             product["brand"] = {
                     "title_fa": product_info["brand"]["name"],

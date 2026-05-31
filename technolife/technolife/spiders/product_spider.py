@@ -216,7 +216,9 @@ class ProductsSpider(RedisSpider):
             number_of_inactivity = response.meta.get("number_of_inactivity")
             user_like = response.meta.get("user_like")
             user_dislike = response.meta.get("user_dislike")
-
+            is_vectorized = response.meta.get("is_vectorized")
+            if is_vectorized == None:
+                is_vectorized = False
             # Extract product ID from URL
             match = re.search(r'product-(\d+)', response.url)
             if match:

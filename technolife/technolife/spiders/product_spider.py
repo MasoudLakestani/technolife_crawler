@@ -24,6 +24,7 @@ class ProductsSpider(RedisSpider):
         redis_keys_env = os.getenv("REDIS_KEYS", "first_crawl")
         self.redis_keys_priority = cycle([f"technolifeProduct:{key.strip()}" for key in redis_keys_env.split(",")])
         self.redis_key = next(self.redis_keys_priority)
+        print(self.redis_key)
     
     def pop_list_queue(self, redis_key, batch_size):
         datas = super().pop_list_queue(redis_key, batch_size)
@@ -168,7 +169,7 @@ class ProductsSpider(RedisSpider):
                     "selling_price":  prices["discounted_price"],
                     "discount_percent": discount
                 }
-
+            prices = current_price_data
             variant_id = int(variant["_id"][-4:], 16)
                 
             if variant_id in ids:

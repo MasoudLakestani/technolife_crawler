@@ -31,4 +31,4 @@ class ProductItem(scrapy.Item):
     variant_id = scrapy.Field()
     scam_score = scrapy.Field()
     is_vectorized = scrapy.Field()
-
+    crawl_url = scrapy.Field()

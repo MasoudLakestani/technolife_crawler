@@ -380,6 +380,7 @@ class ProductsSpider(RedisSpider):
                 product["variant_id"] = None
                 product["mean_of_prices"] = None
             product["scam_score"] = 0
+            product["crawl_url"] = response.url
             yield product
 
         except json.JSONDecodeError as e:

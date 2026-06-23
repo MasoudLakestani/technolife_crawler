@@ -1,6 +1,7 @@
 import re
 import os
 import json
+import base64
 import scrapy
 import logging
 import datetime
@@ -18,6 +19,7 @@ class ProductsSpider(RedisSpider):
     redis_batch_size = 10
     logger = logging.getLogger()
     redis_key = 'technolifeProduct:first_crawl'
+    technolife_affiliate_link = "https://deemanetwork.com/click/d/4b7888df_e8ae_42e1_916a_33172459d735"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -25,6 +27,11 @@ class ProductsSpider(RedisSpider):
         self.redis_keys_priority = cycle([f"technolifeProduct:{key.strip()}" for key in redis_keys_env.split(",")])
         self.redis_key = next(self.redis_keys_priority)
         print(self.redis_key)
+
+    def urlsafe_base64_encode(self, url: str) -> str:
+        return base64.urlsafe_b64encode(
+            url.encode("utf-8")
+        ).decode("utf-8").rstrip("=")
     
     def pop_list_queue(self, redis_key, batch_size):
         datas = super().pop_list_queue(redis_key, batch_size)
@@ -218,6 +225,8 @@ class ProductsSpider(RedisSpider):
             user_like = response.meta.get("user_like")
             user_dislike = response.meta.get("user_dislike")
             is_vectorized = response.meta.get("is_vectorized")
+            base64_encoded_product_url = self.urlsafe_base64_encode(response.url)
+
             if is_vectorized == None:
                 is_vectorized = False
             # Extract product ID from URL
@@ -275,7 +284,7 @@ class ProductsSpider(RedisSpider):
             product["description"] = None
             product["is_fake"] = False
             product["admin_marked_fake"] = False
-            product["url"] = response.url
+            product["url"] = f"{self.technolife_affiliate_link}/{base64_encoded_product_url}"
             product["website"] = {
                 "title": "technolife",
                 "url": "www.technolife.com"

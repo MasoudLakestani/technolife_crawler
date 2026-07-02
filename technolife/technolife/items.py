@@ -32,3 +32,4 @@ class ProductItem(scrapy.Item):
     scam_score = scrapy.Field()
     is_vectorized = scrapy.Field()
     crawl_url = scrapy.Field()
+    is_wp = scrapy.Field()

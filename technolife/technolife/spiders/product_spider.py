@@ -381,6 +381,7 @@ class ProductsSpider(RedisSpider):
                 product["mean_of_prices"] = None
             product["scam_score"] = 0
             product["crawl_url"] = response.url
+            product["is_wp"] = False
             yield product
 
         except json.JSONDecodeError as e:

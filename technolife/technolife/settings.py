@@ -100,8 +100,6 @@ LOG_LEVEL = "ERROR"
 # REDIS_START_URLS_KEY = '%(name)s:start_urls'
 SCHEDULER = "scrapy_redis.scheduler.Scheduler"
 DUPEFILTER_CLASS = "technolife.dupefilter.NoDupeFilter"
-REDIS_URL = 'redis://:rv6e7hya18nPA@62.106.95.202:6379'
-# REDIS_URL = 'redis://localhost:6379'
 SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.FifoQueue'
 MAX_IDLE_TIME_BEFORE_CLOSE = 3600 * 30
 
@@ -109,4 +107,18 @@ ITEM_PIPELINES = {
    'scrapy_redis.pipelines.RedisPipeline': 200,
 }
 
-LOG_LEVEL = "ERROR"
+LOG_LEVEL = os.getenv("LOG_LEVEL", "ERROR")
+
+REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
+REDIS_PORT = os.getenv("REDIS_PORT") or "6379"
+REDIS_USERNAME = os.getenv("REDIS_USERNAME", "default")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
+REDIS_DB = os.getenv("REDIS_CRAWLER_DB", "0")
+
+if REDIS_PASSWORD:
+    REDIS_URL = (
+        f"redis://{quote(REDIS_USERNAME, safe='')}:{quote(REDIS_PASSWORD, safe='')}"
+        f"@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+    )
+else:
+    REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"

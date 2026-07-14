@@ -19,26 +19,129 @@ class ProductsSpider(RedisSpider):
     redis_batch_size = 10
     logger = logging.getLogger()
     redis_key = 'technolifeProduct:first_crawl'
+    redis_key_check_interval = 1800
     technolife_affiliate_link = "https://deemanetwork.com/click/d/4b7888df_e8ae_42e1_916a_33172459d735"
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.redis_keys = []
+        self._periodic_update_timer = None
+        self._periodic_update_started = False
+        self._periodic_update_stopped = False
+
+    def setup_redis(self, crawler=None):
+        super().setup_redis(crawler)
+        self.load_redis_keys()
+        self.select_highest_priority_key()
+        self.start_periodic_update()
+
+        crawler = crawler or self.crawler
+        crawler.signals.connect(
+            self.stop_periodic_update,
+            signal=signals.spider_closed,
+        )
+    
+    def normalize_redis_key(self, key):
+        key = key.strip()
+        if key.startswith("technolifeProduct:"):
+            return key
+        return f"technolifeProduct:{key}"
+
+    def get_redis_keys(self):
         redis_keys_env = os.getenv("REDIS_KEYS", "first_crawl")
-        self.redis_keys_priority = cycle([f"technolifeProduct:{key.strip()}" for key in redis_keys_env.split(",")])
-        self.redis_key = next(self.redis_keys_priority)
-        print(self.redis_key)
+        keys = []
+        seen = set()
+
+        for key in redis_keys_env.split(","):
+            if not key.strip():
+                continue
+            redis_key = self.normalize_redis_key(key)
+            if redis_key not in seen:
+                keys.append(redis_key)
+                seen.add(redis_key)
+
+        return keys or [self.redis_key]
+
+    def load_redis_keys(self):
+        self.redis_keys = self.get_redis_keys()
+
+    def redis_key_has_items(self, redis_key):
+        if self.server is None:
+            return False
+        return self.count_size(redis_key) > 0
+
+    def select_highest_priority_key(self, require_items=False):
+        for redis_key in self.redis_keys:
+            if self.redis_key_has_items(redis_key):
+                if self.redis_key != redis_key:
+                    self.redis_key = redis_key
+                    self.logger.info(f"Switched Redis key to: {redis_key}")
+                return redis_key
+
+        if require_items:
+            return None
+
+        if self.redis_key not in self.redis_keys and self.redis_keys:
+            self.redis_key = self.redis_keys[0]
+        return self.redis_key
+
+    def start_periodic_update(self):
+        if self._periodic_update_started:
+            return
+
+        self._periodic_update_started = True
+
+        def update_keys():
+            if self._periodic_update_stopped:
+                return
+
+            try:
+                new_keys = self.get_redis_keys()
+
+                if new_keys != self.redis_keys:
+                    self.redis_keys = new_keys
+                    self.logger.info(f"Updated Redis keys: {new_keys}")
+
+                self.select_highest_priority_key()
+            finally:
+                self._periodic_update_timer = Timer(
+                    self.redis_key_check_interval,
+                    update_keys,
+                )
+                self._periodic_update_timer.daemon = True
+                self._periodic_update_timer.start()
+        
+        update_keys()
+
+    def stop_periodic_update(self, *args, **kwargs):
+        self._periodic_update_stopped = True
+        if self._periodic_update_timer:
+            self._periodic_update_timer.cancel()
+
+    def pop_list_queue(self, redis_key, batch_size):
+        selected_key = self.select_highest_priority_key(require_items=True)
+        if selected_key is None:
+            return []
+
+        datas = super().pop_list_queue(selected_key, batch_size)
+        if datas:
+            return datas
+
+        selected_key = self.select_highest_priority_key(require_items=True)
+        if selected_key is None:
+            return []
+        return super().pop_list_queue(selected_key, batch_size)
+
+    def spider_idle(self):
+        self.select_highest_priority_key()
+        super().spider_idle()
+
 
     def urlsafe_base64_encode(self, url: str) -> str:
         return base64.urlsafe_b64encode(
             url.encode("utf-8")
         ).decode("utf-8").rstrip("=")
-    
-    def pop_list_queue(self, redis_key, batch_size):
-        datas = super().pop_list_queue(redis_key, batch_size)
-        if not datas:
-            self.redis_key = next(self.redis_keys_priority)
-            self.logger.info(f"Change Redis key: {self.redis_key}")
-        return datas
     
     def update_price(self, updating_variant, prices):
         today_jdate = jdatetime.date.today()

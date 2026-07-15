@@ -7,6 +7,7 @@ import logging
 import datetime
 import jdatetime
 from itertools import cycle
+from threading import Timer
 from technolife.items import *
 from scrapy.exceptions import DontCloseSpider
 from scrapy_redis.spiders import RedisSpider

@@ -6,6 +6,7 @@ import scrapy
 import logging
 import datetime
 import jdatetime
+from scrapy import signals
 from itertools import cycle
 from threading import Timer
 from technolife.items import *

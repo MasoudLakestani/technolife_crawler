@@ -6,6 +6,8 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+import os
+from urllib.parse import quote
 
 BOT_NAME = "technolife"
 
@@ -95,9 +97,8 @@ AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
-LOG_LEVEL = "ERROR"
-#
-# REDIS_START_URLS_KEY = '%(name)s:start_urls'
+
+
 SCHEDULER = "scrapy_redis.scheduler.Scheduler"
 DUPEFILTER_CLASS = "technolife.dupefilter.NoDupeFilter"
 SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.FifoQueue'
@@ -107,8 +108,14 @@ ITEM_PIPELINES = {
    'scrapy_redis.pipelines.RedisPipeline': 200,
 }
 
-LOG_LEVEL = os.getenv("LOG_LEVEL", "ERROR")
 
+ELASTICSEARCH_HOST = os.getenv("ELASTICSEARCH_HOST")
+ELASTICSEARCH_PORT = os.getenv("ELASTICSEARCH_PORT")
+ELASTICSEARCH_USER = os.getenv("ELASTICSEARCH_USER")
+ELASTICSEARCH_PASSWORD = os.getenv("ELASTICSEARCH_PASSWORD")
+ELASTICSEARCH_PRODUCT_INDEX = os.getenv("ELASTICSEARCH_PRODUCT_INDEX", "products")
+
+LOG_LEVEL = os.getenv("LOG_LEVEL", "ERROR")
 REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = os.getenv("REDIS_PORT") or "6379"
 REDIS_USERNAME = os.getenv("REDIS_USERNAME", "default")

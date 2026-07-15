@@ -2,20 +2,18 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt ./
 
-COPY pyproject.toml poetry.lock* ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip install poetry && \
-    poetry config virtualenvs.create false && \
-    poetry lock && \
-    poetry install --no-root
+RUN groupadd --system crawler \
+    && useradd \
+        --system \
+        --gid crawler \
+        --home-dir /app \
+        --shell /usr/sbin/nologin \
+        crawler
 
-COPY technolife/ ./technolife/
+COPY --chown=crawler:crawler . .
 
-WORKDIR /app/technolife
-
-
-CMD ["scrapy", "crawl", "technolifeProduct"]
+USER crawler

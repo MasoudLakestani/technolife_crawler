@@ -1,13 +1,19 @@
 version: '3.8'
 
 services:
-  technolife-crawler:
+  products:
     build: .
+    working_dir: /app/technolife
+    command: ["scrapy", "crawl", "technolifeProduct"]
     env_file:
       - /opt/blackeveryday/config/.env.common
       - /opt/blackeveryday/crawlers/config/.env
-    volumes:
-      - ./data:/app/data
+    networks:
+      - blackeveryday_network
     restart: unless-stopped
     deploy:
-      replicas: 20
+      replicas: 2
+
+networks:
+  blackeveryday_network:
+    external: true
